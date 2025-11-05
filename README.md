@@ -65,9 +65,9 @@ Kapuctagram — для тех, кто ценит:
 
 ### 📡 Контакты
 
-💻 **Backend-разработчик:** [@твой_канал_backend](https://t.me/mdpkaaa)  
-🎨 **Frontend-разработчик:** [@твой_канал_frontend](https://t.me/твой_канал_frontend)  
-👾 **Наш сквад:** [@наш_командный_канал](https://t.me/наш_командный_канал)
+💻 **Backend-разработчик:** [mdpka](https://t.me/mdpkaaa)  
+🎨 **Frontend-разработчик:** [10i](https://t.me/neprikayaniy)  
+👾 **Наш сквад:** [KAPUCTA squad](https://t.me/KAPUCTA_SQUAD_10I)
 
 ---
 
