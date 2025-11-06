@@ -33,8 +33,6 @@
             this.RegisterInfoL = new System.Windows.Forms.Label();
             this.Diff_of_PasswordL = new System.Windows.Forms.Label();
             this.AutoLoginB = new System.Windows.Forms.Button();
-            this.NameTB = new System.Windows.Forms.TextBox();
-            this.NameL = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // RegisterB
@@ -52,7 +50,7 @@
             // PasswordTB
             // 
             this.PasswordTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.PasswordTB.Location = new System.Drawing.Point(6, 72);
+            this.PasswordTB.Location = new System.Drawing.Point(6, 27);
             this.PasswordTB.MaxLength = 40;
             this.PasswordTB.Name = "PasswordTB";
             this.PasswordTB.Size = new System.Drawing.Size(266, 24);
@@ -63,7 +61,7 @@
             // 
             this.RegisterInfoL.AutoSize = true;
             this.RegisterInfoL.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.RegisterInfoL.Location = new System.Drawing.Point(3, 99);
+            this.RegisterInfoL.Location = new System.Drawing.Point(3, 54);
             this.RegisterInfoL.Name = "RegisterInfoL";
             this.RegisterInfoL.Size = new System.Drawing.Size(241, 68);
             this.RegisterInfoL.TabIndex = 2;
@@ -76,7 +74,7 @@
             this.Diff_of_PasswordL.BackColor = System.Drawing.SystemColors.Control;
             this.Diff_of_PasswordL.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Diff_of_PasswordL.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.Diff_of_PasswordL.Location = new System.Drawing.Point(3, 54);
+            this.Diff_of_PasswordL.Location = new System.Drawing.Point(3, 9);
             this.Diff_of_PasswordL.Name = "Diff_of_PasswordL";
             this.Diff_of_PasswordL.Size = new System.Drawing.Size(102, 15);
             this.Diff_of_PasswordL.TabIndex = 3;
@@ -85,41 +83,18 @@
             // AutoLoginB
             // 
             this.AutoLoginB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.AutoLoginB.Location = new System.Drawing.Point(172, 170);
+            this.AutoLoginB.Location = new System.Drawing.Point(172, 167);
             this.AutoLoginB.Name = "AutoLoginB";
             this.AutoLoginB.Size = new System.Drawing.Size(100, 30);
             this.AutoLoginB.TabIndex = 4;
             this.AutoLoginB.Text = "AutoLogin";
             this.AutoLoginB.UseVisualStyleBackColor = true;
             // 
-            // NameTB
-            // 
-            this.NameTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.NameTB.Location = new System.Drawing.Point(6, 27);
-            this.NameTB.MaxLength = 40;
-            this.NameTB.Name = "NameTB";
-            this.NameTB.Size = new System.Drawing.Size(266, 24);
-            this.NameTB.TabIndex = 5;
-            // 
-            // NameL
-            // 
-            this.NameL.AutoSize = true;
-            this.NameL.BackColor = System.Drawing.SystemColors.Control;
-            this.NameL.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.NameL.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.NameL.Location = new System.Drawing.Point(3, 9);
-            this.NameL.Name = "NameL";
-            this.NameL.Size = new System.Drawing.Size(171, 15);
-            this.NameL.TabIndex = 6;
-            this.NameL.Text = "Введите имя (опционально)";
-            // 
             // RegisterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
-            this.Controls.Add(this.NameL);
-            this.Controls.Add(this.NameTB);
             this.Controls.Add(this.AutoLoginB);
             this.Controls.Add(this.Diff_of_PasswordL);
             this.Controls.Add(this.RegisterInfoL);
@@ -132,6 +107,7 @@
             this.Load += new System.EventHandler(this.RegisterForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
@@ -141,8 +117,6 @@
         private System.Windows.Forms.Label RegisterInfoL;
         private System.Windows.Forms.Label Diff_of_PasswordL;
         private System.Windows.Forms.Button AutoLoginB;
-        private System.Windows.Forms.TextBox NameTB;
-        private System.Windows.Forms.Label NameL;
     }
 }
 

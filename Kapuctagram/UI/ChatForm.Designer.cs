@@ -1,6 +1,6 @@
 ﻿namespace KAPUCTAgram
 {
-    partial class KAPUCTAgram
+    partial class ChatForm
     {
         /// <summary>
         /// Required designer variable.
@@ -47,6 +47,7 @@
             this.MessageTB.Size = new System.Drawing.Size(695, 24);
             this.MessageTB.TabIndex = 0;
             this.MessageTB.TextChanged += new System.EventHandler(this.MessageTB_TextChanged);
+            this.MessageTB.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTB_KeyDown);
             // 
             // ChatBox
             // 
@@ -68,7 +69,6 @@
             this.SendB.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.SendB.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.SendB.ForeColor = System.Drawing.Color.White;
-            this.SendB.Image = global::Kapuctagram.Properties.Resources.sendMessage;
             this.SendB.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.SendB.Location = new System.Drawing.Point(713, 373);
             this.SendB.Name = "SendB";
@@ -76,7 +76,6 @@
             this.SendB.Size = new System.Drawing.Size(75, 23);
             this.SendB.TabIndex = 1;
             this.SendB.Text = "Send";
-            this.SendB.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.SendB.UseVisualStyleBackColor = false;
             // 
             // KAPUCTAgram
@@ -92,9 +91,7 @@
             this.Text = "KAPUCTAgram";
             this.ResumeLayout(false);
             this.PerformLayout();
-            this.Load += new System.EventHandler(this.KAPUCTAgram_Load);
-            this.MessageTB.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTB_KeyDown);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.KAPUCTAgram_FormClosing);
+
         }
 
         #endregion

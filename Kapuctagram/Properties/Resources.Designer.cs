@@ -63,39 +63,9 @@ namespace Kapuctagram.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _149446 {
+        internal static System.Drawing.Bitmap sendMessageB {
             get {
-                object obj = ResourceManager.GetObject("149446", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap sand {
-            get {
-                object obj = ResourceManager.GetObject("sand", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap send {
-            get {
-                object obj = ResourceManager.GetObject("send", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap sendMessage {
-            get {
-                object obj = ResourceManager.GetObject("sendMessage", resourceCulture);
+                object obj = ResourceManager.GetObject("sendMessageB", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

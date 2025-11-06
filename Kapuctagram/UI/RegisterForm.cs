@@ -9,6 +9,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Kapuctagram.Core.Models;
+using Kapuctagram.Core.Services;
+using KAPUCTAgram;
 
 namespace Kapuctagram
 {
@@ -53,52 +56,38 @@ namespace Kapuctagram
         private void RegisterB_Click(object sender, EventArgs e)
         {
             string password = PasswordTB.Text.Trim();
-            string name = string.IsNullOrWhiteSpace(NameTB.Text.Trim())
-                ? $"User_{new Random().Next(1000, 9999)}"
-                : NameTB.Text.Trim();
+            string name = $"User_{new Random().Next(1000, 9999)}";
 
             if (string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Пароль не может быть пустым!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Пароль не может быть пустым!");
                 return;
             }
 
-            // Сохраняем в AppData
-            SaveAccountToAppData(password, name);
+            var user = new User { Name = name, Password = password };
+            var accountService = new AccountService();
+            accountService.SaveAccount(user);
 
-            // Открываем чат
-            var chatForm = new KAPUCTAgram.KAPUCTAgram(password, name, "127.0.0.1");
-            chatForm.FormClosed += (s, args) => Application.Exit(); // ← КРИТИЧЕСКИ ВАЖНО
+            var chatForm = new ChatForm(user);
+            chatForm.FormClosed += (s, args) => Application.Exit();
             chatForm.Show();
             this.Hide();
         }
 
         private void LoginWithSavedAccount(string password, string name)
         {
-            // Сохраняем аккаунт (на всякий случай)
-            SaveAccountToAppData(password, name);
+            // Создаём User
+            var user = new User { Name = name, Password = password };
 
-            // Создаём чат и настраиваем завершение приложения
-            var chatForm = new KAPUCTAgram.KAPUCTAgram(password, name, "127.0.0.1");
+            // Сохраняем через сервис
+            var accountService = new AccountService();
+            accountService.SaveAccount(user);
+
+            // Открываем чат
+            var chatForm = new ChatForm(user);
             chatForm.FormClosed += (s, args) => Application.Exit();
             chatForm.Show();
             this.Hide();
-        }
-
-        private void SaveAccountToAppData(string password, string name)
-        {
-            string appDataPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "KAPUCTAgram"
-            );
-            Directory.CreateDirectory(appDataPath);
-            string accountFile = Path.Combine(appDataPath, "current_account.txt");
-            File.WriteAllText(accountFile, $"{password}|{name}");
-        }
-
-        private string GenerateRandomName()
-        {
-            return $"User_{new Random().Next(1000, 9999)}";
         }
 
         private void RegisterForm_Load(object sender, EventArgs e)
