@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Kapuctagram/Network/ClientConnection.cs
+using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using Kapuctagram.Core;
 using Kapuctagram.Core.Models;
-using Kapuctagram.Core.Protocol;
+using Kapuctagram.Protocol;
 
 namespace Kapuctagram.Network
 {
@@ -12,126 +15,112 @@ namespace Kapuctagram.Network
     {
         private TcpClient _client;
         private NetworkStream _stream;
-        private StreamReader _reader;
-        private StreamWriter _writer;
+        private readonly string _historyPath;
+        private bool _disposed = false;
 
-        public event Action<Message> OnMessageReceived;
-        public event Action<string> OnError;
+        public event Action<ChatMessage> OnMessageReceived;
 
-        /// <summary>
-        /// Подключается к серверу и выполняет аутентификацию
-        /// </summary>
-        public async Task<bool> ConnectAsync(string ip, int port, User user)
+        public ClientConnection(string historyPath)
         {
-            try
-            {
-                _client = new TcpClient();
-                await _client.ConnectAsync(ip, port); // Асинхронное подключение
-
-                _stream = _client.GetStream();
-                _reader = new StreamReader(_stream);
-                _writer = new StreamWriter(_stream, Encoding.UTF8) { AutoFlush = true };
-
-                // Отправляем AUTH:password|name|userId
-                string authMessage = $"AUTH:{user.Password}|{user.Name}|{user.ID}";
-                await _writer.WriteLineAsync(authMessage);
-
-                // Ждём ответ от сервера
-                string response = await _reader.ReadLineAsync();
-                if (response == "OK")
-                {
-                    // Запускаем фоновый приём сообщений
-                    _ = Task.Run(ReceiveLoop); // Запускаем и не ждём
-                    return true;
-                }
-                else
-                {
-                    OnError?.Invoke($"Ошибка аутентификации: {response}");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                OnError?.Invoke($"Ошибка подключения: {ex.Message}");
-                return false;
-            }
+            _historyPath = historyPath;
+            Directory.CreateDirectory(Path.GetDirectoryName(_historyPath));
         }
 
-        /// <summary>
-        /// Отправляет сообщение на сервер
-        /// </summary>
-        public async Task SendMessageAsync(Message message)
+        // Подключение без аутентификации — остаётся
+        public async Task ConnectAsync(string ip, int port)
         {
-            if (_writer == null || _client == null || !_client.Connected)
-            {
-                OnError?.Invoke("Нет подключения к серверу");
-                return;
-            }
-
-            try
-            {
-                string rawMessage = MessageBuilder.Build(message);
-                await _writer.WriteLineAsync(rawMessage);
-            }
-            catch (Exception ex)
-            {
-                OnError?.Invoke($"Ошибка отправки: {ex.Message}");
-            }
+            _client = new TcpClient();
+            await _client.ConnectAsync(ip, port);
+            _stream = _client.GetStream();
         }
 
-        /// <summary>
-        /// Фоновый цикл приёма сообщений
-        /// </summary>
-        private async Task ReceiveLoop()
+        // 🔑 НОВОЕ: аутентификация
+        public async Task<User> AuthenticateAsync(string password, string name)
+        {
+            string authData = $"{password} | {name}";
+            await SendRawAsync('A', authData);
+
+            // Ждём ответ от сервера
+            var responseMsg = await MessageParser.ReadMessageAsync(_stream);
+            if (responseMsg.Type != 'A')
+                throw new InvalidOperationException("Сервер не вернул данные аутентификации");
+
+            string[] parts = responseMsg.Text.Split(new string[] { " | " }, StringSplitOptions.None);
+            if (parts.Length != 2)
+                throw new InvalidDataException("Некорректный ответ сервера");
+
+            string userId = parts[0];
+            string finalName = parts[1];
+
+            // Запускаем прослушку сообщений
+            _ = ListenAsync();
+
+            return new User { ID = userId, Name = finalName, Password = password };
+        }
+
+        // Прослушка — остаётся
+        private async Task ListenAsync()
         {
             try
             {
-                while (_client != null && _client.Connected && _stream != null)
+                while (!_disposed && _client.Connected)
                 {
-                    string line = await _reader.ReadLineAsync();
-                    if (string.IsNullOrEmpty(line))
-                        break;
-
-                    try
-                    {
-                        Message message = MessageParser.Parse(line);
-                        OnMessageReceived?.Invoke(message);
-                    }
-                    catch (Exception ex)
-                    {
-                        OnError?.Invoke($"Ошибка парсинга: {ex.Message}");
-                    }
+                    var msg = await MessageParser.ReadMessageAsync(_stream);
+                    File.AppendAllText(_historyPath, $"[{msg.Type}] {DateTime.Now:HH:mm} {msg.Text}\n");
+                    OnMessageReceived?.Invoke(new ChatMessage { Type = msg.Type, Text = msg.Text });
                 }
             }
             catch (Exception ex)
             {
-                OnError?.Invoke($"Ошибка приёма: {ex.Message}");
-            }
-            finally
-            {
-                // Уведомляем, что соединение потеряно
-                OnError?.Invoke("Соединение с сервером закрыто");
+                if (!_disposed)
+                    MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Корректное освобождение ресурсов
-        /// </summary>
+        // Отправка текста — остаётся
+        public async Task SendTextAsync(string text)
+        {
+            await SendRawAsync('T', text);
+        }
+
+        // Отправка файла — остаётся
+        public async Task SendFileAsync(string filePath)
+        {
+            string fileName = Path.GetFileName(filePath);
+            long fileSize = new FileInfo(filePath).Length;
+            if (fileSize > 8L * 1024 * 1024 * 1024)
+                throw new InvalidOperationException("Файл >8 ГБ");
+
+            await SendRawAsync('F', fileName);
+
+            using (FileStream fs = File.OpenRead(filePath))
+            {
+                byte[] buffer = new byte[256 * 1024];
+                int bytesRead;
+                while ((bytesRead = await fs.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    await _stream.WriteAsync(buffer, 0, bytesRead);
+                }
+            }
+
+            File.AppendAllText(_historyPath, $"[FILE SENT] {DateTime.Now:HH:mm} {fileName}\n");
+        }
+
+        // Вспомогательный метод — остаётся
+        private async Task SendRawAsync(char type, string data)
+        {
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            await _stream.WriteAsync(new byte[] { (byte)type }, 0, 1);
+            await _stream.WriteAsync(BitConverter.GetBytes(dataBytes.Length), 0, 4);
+            await _stream.WriteAsync(dataBytes, 0, dataBytes.Length);
+        }
+
+        // Dispose — остаётся
         public void Dispose()
         {
-            try
-            {
-                _writer?.Close();
-                _reader?.Close();
-                _client?.Close();
-            }
-            catch { }
-            finally
-            {
-                _writer?.Dispose();
-                _reader?.Dispose();
-                _client?.Dispose();
-            }
+            _disposed = true;
+            _client?.Close();
+            _client?.Dispose();
         }
     }
 }

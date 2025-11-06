@@ -1,44 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// Kapuctagram/Services/ChatService.cs
+using System;
 using System.Threading.Tasks;
-using Kapuctagram.Core.Models;
-using Kapuctagram.Network;
+using Kapuctagram.Core;        // ← добавлено
+using Kapuctagram.Network;     // ← добавлено
 
-namespace Kapuctagram.Core.Services
+namespace Kapuctagram.Services
 {
     public class ChatService
     {
-        private readonly ClientConnection _connection;
-        private readonly List<Message> _history = new List<Message>();
+        private ClientConnection _connection;
 
-        public ChatService(ClientConnection connection)
+        // Было: Action<Message> → стало: Action<ChatMessage>
+        public event Action<ChatMessage> OnMessageReceived;
+
+        public async Task ConnectAsync(string ip, int port, string historyPath)
         {
-            _connection = connection;
-            _connection.OnMessageReceived += OnMessage;
+            _connection = new ClientConnection(historyPath);
+            // Было: msg => OnMessageReceived?.Invoke(msg)
+            // Теперь типы совпадают
+            _connection.OnMessageReceived += msg => OnMessageReceived?.Invoke(msg);
+            await _connection.ConnectAsync(ip, port);
         }
 
-        private void OnMessage(Message msg)
+        public async Task SendTextAsync(string text)
         {
-            _history.Add(msg);
-            // Уведомить UI через событие
+            await _connection.SendTextAsync(text);
         }
 
-        public async Task SendPublicMessage(string text, User currentUser)
+        public async Task SendFileAsync(string filePath)
         {
-            var msg = new Message
-            {
-                Type = MessageType.Public,
-                SenderId = currentUser.ID,
-                Content = text
-            };
-            await _connection.SendMessageAsync(msg);
+            await _connection.SendFileAsync(filePath);
         }
 
-        public async Task SendPrivateMessage(string text, User currentUser, string targetId)
+        public void Disconnect()
         {
-            // аналогично
+            _connection?.Dispose();
         }
     }
 }

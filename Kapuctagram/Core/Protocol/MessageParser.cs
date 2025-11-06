@@ -1,60 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Kapuctagram/Protocol/MessageParser.cs
+using System;
+using System.IO;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Kapuctagram.Core.Models;
+using Kapuctagram.Core;
 
-namespace Kapuctagram.Core.Protocol
+namespace Kapuctagram.Protocol
 {
     public static class MessageParser
     {
-        public static Message Parse(string rawMessage)
+        public static async Task<ChatMessage> ReadMessageAsync(NetworkStream stream)
         {
-            if (string.IsNullOrEmpty(rawMessage))
-                throw new ArgumentException("Сообщение не может быть пустым", nameof(rawMessage));
+            byte[] typeBuf = new byte[1];
+            await ReadExactly(stream, typeBuf);
+            char type = (char)typeBuf[0];
 
-            string[] parts = rawMessage.Split('|');
-            if (parts.Length < 3)
-                throw new FormatException("Неверный формат сообщения: недостаточно частей");
+            byte[] lenBuf = new byte[4];
+            await ReadExactly(stream, lenBuf);
+            int length = BitConverter.ToInt32(lenBuf, 0);
 
-            Message message = new Message();
+            if (length < 0 || length > 10_000_000)
+                throw new InvalidDataException("Некорректная длина сообщения");
 
-            switch (parts[0])
+            if (type == 'T')
             {
-                case "T":
-                    if (parts.Length < 3) throw new FormatException("Недостаточно данных для публичного сообщения");
-                    message.Type = MessageType.Public;
-                    message.SenderId = parts[1];
-                    message.Content = parts[2];
-                    break;
-
-                case "P":
-                    if (parts.Length < 4) throw new FormatException("Недостаточно данных для личного сообщения");
-                    message.Type = MessageType.Private;
-                    message.SenderId = parts[1];
-                    message.TargetId = parts[2];
-                    message.Content = parts[3];
-                    break;
-
-                case "F":
-                    if (parts.Length < 5) throw new FormatException("Недостаточно данных для файла");
-                    message.Type = MessageType.File;
-                    message.SenderId = parts[1];
-                    message.TargetId = parts[2];
-                    message.Content = parts[3]; // имя файла
-                                                // parts[4] — длина файла (можно сохранить как long)
-                    if (long.TryParse(parts[4], out long fileSize))
-                    {
-                        // Можно добавить свойство FileSize в Message, если нужно
-                    }
-                    break;
-
-                default:
-                    throw new NotSupportedException($"Неизвестный тип сообщения: {parts[0]}");
+                byte[] data = new byte[length];
+                await ReadExactly(stream, data);
+                string text = Encoding.UTF8.GetString(data);
+                return ChatMessage.CreateText(text);
             }
+            else if (type == 'F')
+            {
+                byte[] data = new byte[length];
+                await ReadExactly(stream, data);
+                string fileName = Encoding.UTF8.GetString(data);
+                return ChatMessage.CreateFile(fileName);
+            }
+            else if (type == 'A') // Добавьте эту обработку
+            {
+                byte[] data = new byte[length];
+                await ReadExactly(stream, data);
+                string text = Encoding.UTF8.GetString(data);
+                return new ChatMessage { Type = type, Text = text };
+            }
+            else
+            {
+                // Пропускаем P/G
+                byte[] skip = new byte[length];
+                await ReadExactly(stream, skip);
+                return new ChatMessage { Type = type, Text = "[Unsupported]" };
+            }
+        }
 
-            return message;
+        private static async Task ReadExactly(Stream stream, byte[] buffer)
+        {
+            int total = 0;
+            while (total < buffer.Length)
+            {
+                int read = await stream.ReadAsync(buffer, total, buffer.Length - total);
+                if (read == 0)
+                    throw new EndOfStreamException("Соединение закрыто");
+                total += read;
+            }
         }
     }
 }

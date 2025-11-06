@@ -1,4 +1,4 @@
-﻿namespace KAPUCTAgram
+﻿namespace Kapuctagram.UI
 {
     partial class ChatForm
     {
@@ -46,8 +46,8 @@
             this.MessageTB.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.MessageTB.Size = new System.Drawing.Size(695, 24);
             this.MessageTB.TabIndex = 0;
-            this.MessageTB.TextChanged += new System.EventHandler(this.MessageTB_TextChanged);
-            this.MessageTB.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTB_KeyDown);
+            //this.MessageTB.TextChanged += new System.EventHandler(this.MessageTB_TextChanged);
+            //this.MessageTB.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MessageTB_KeyDown);
             // 
             // ChatBox
             // 

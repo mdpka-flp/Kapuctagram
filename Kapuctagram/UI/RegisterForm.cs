@@ -12,18 +12,23 @@ using System.Windows.Forms;
 using Kapuctagram.Core.Models;
 using Kapuctagram.Core.Services;
 using KAPUCTAgram;
+using Kapuctagram.Core;        // ← для ChatMessage (если используется)
+using Kapuctagram.Services;    // ← для ChatService
+using Kapuctagram.UI;          // ← КЛЮЧЕВОЕ: чтобы найти ChatForm
+using Kapuctagram.Network;
 
 namespace Kapuctagram
 {
     public partial class RegisterForm : Form
     {
-        private string serverIp = "127.0.0.1";
-        private const int serverPort = 8888;
-        
-        public RegisterForm()
+        private string _serverIP = "127.0.0.1";
+        private int _serverPort = 1337;
+
+        public RegisterForm(string serverIP, int serverPort)
         {
             InitializeComponent();
-            CheckSavedAccount();
+            _serverIP = serverIP;
+            _serverPort = serverPort;
         }
 
         private void CheckSavedAccount()
@@ -53,7 +58,7 @@ namespace Kapuctagram
             }
         }
 
-        private void RegisterB_Click(object sender, EventArgs e)
+        private async void RegisterB_Click(object sender, EventArgs e)
         {
             string password = PasswordTB.Text.Trim();
             string name = $"User_{new Random().Next(1000, 9999)}";
@@ -68,26 +73,52 @@ namespace Kapuctagram
             var accountService = new AccountService();
             accountService.SaveAccount(user);
 
-            var chatForm = new ChatForm(user);
-            chatForm.FormClosed += (s, args) => Application.Exit();
-            chatForm.Show();
-            this.Hide();
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string historyPath = Path.Combine(appData, "Kapuctagram", $"{user.Name}_chat_history.txt");
+
+            var connection = new ClientConnection(historyPath); // ← теперь виден
+            try
+            {
+                await connection.ConnectAsync(_serverIP, _serverPort);
+                User authenticatedUser = await connection.AuthenticateAsync(password, name);
+
+                var chatForm = new ChatForm(historyPath);
+                chatForm.FormClosed += (s, args) => Application.Exit();
+                chatForm.Show();
+                this.Hide();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка подключения: {ex.Message}");
+                connection?.Dispose();
+            }
         }
 
-        private void LoginWithSavedAccount(string password, string name)
+        private async void LoginWithSavedAccount(string password, string name)
         {
-            // Создаём User
             var user = new User { Name = name, Password = password };
-
-            // Сохраняем через сервис
             var accountService = new AccountService();
             accountService.SaveAccount(user);
 
-            // Открываем чат
-            var chatForm = new ChatForm(user);
-            chatForm.FormClosed += (s, args) => Application.Exit();
-            chatForm.Show();
-            this.Hide();
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string historyPath = Path.Combine(appData, "Kapuctagram", $"{user.Name}_chat_history.txt");
+
+            var connection = new ClientConnection(historyPath);
+            try
+            {
+                await connection.ConnectAsync(_serverIP, _serverPort);
+                User authenticatedUser = await connection.AuthenticateAsync(password, name);
+
+                var chatForm = new ChatForm(historyPath);
+                chatForm.FormClosed += (s, args) => Application.Exit();
+                chatForm.Show();
+                this.Hide();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка входа: {ex.Message}");
+                connection.Dispose();
+            }
         }
 
         private void RegisterForm_Load(object sender, EventArgs e)

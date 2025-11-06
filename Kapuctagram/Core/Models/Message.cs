@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Kapuctagram.Core.Models
+﻿// Kapuctagram/Core/ChatMessage.cs
+namespace Kapuctagram.Core
 {
-    public class Message
+    public class ChatMessage
     {
-        public MessageType Type { get; set; } // Text, File, Private, Group
-        public string SenderId { get; set; }  // ID отправителя
-        public string SenderName { get; set; } // Имя отправителя
-        public string TargetId { get; set; }  // ID получателя (для ЛС) или группы
-        public string Content { get; set; }   // Текст или метаданные файла
-        public byte[] FileData { get; set; }  // Только при передаче файла
-        public DateTime Timestamp { get; set; }
-    }
+        public char Type { get; set; }
+        public string Text { get; set; }
+        public string FileName { get; set; }
+        public long FileSize { get; set; }
 
-    public enum MessageType
-    {
-        Public,
-        Private,
-        Group,
-        File
+        // Фабричные методы
+        public static ChatMessage CreateText(string text)
+        {
+            return new ChatMessage { Type = 'T', Text = text };
+        }
+
+        public static ChatMessage CreateFile(string fileName, long fileSize = 0)
+        {
+            return new ChatMessage { Type = 'F', FileName = fileName, FileSize = fileSize };
+        }
     }
 }
