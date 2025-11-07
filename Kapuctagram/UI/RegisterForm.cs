@@ -69,20 +69,17 @@ namespace Kapuctagram
                 return;
             }
 
-            var user = new User { Name = name, Password = password };
-            var accountService = new AccountService();
-            accountService.SaveAccount(user);
-
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string historyPath = Path.Combine(appData, "Kapuctagram", $"{user.Name}_chat_history.txt");
+            string historyPath = Path.Combine(appData, "Kapuctagram", $"{name}_chat_history.txt");
 
-            var connection = new ClientConnection(historyPath); // ← теперь виден
+            var connection = new ClientConnection(historyPath);
             try
             {
                 await connection.ConnectAsync(_serverIP, _serverPort);
                 User authenticatedUser = await connection.AuthenticateAsync(password, name);
 
-                var chatForm = new ChatForm(historyPath);
+                // ПЕРЕДАЕМ имя пользователя в ChatForm
+                var chatForm = new ChatForm(connection, authenticatedUser.Name);
                 chatForm.FormClosed += (s, args) => Application.Exit();
                 chatForm.Show();
                 this.Hide();
@@ -96,12 +93,8 @@ namespace Kapuctagram
 
         private async void LoginWithSavedAccount(string password, string name)
         {
-            var user = new User { Name = name, Password = password };
-            var accountService = new AccountService();
-            accountService.SaveAccount(user);
-
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string historyPath = Path.Combine(appData, "Kapuctagram", $"{user.Name}_chat_history.txt");
+            string historyPath = Path.Combine(appData, "Kapuctagram", $"{name}_chat_history.txt");
 
             var connection = new ClientConnection(historyPath);
             try
@@ -109,7 +102,8 @@ namespace Kapuctagram
                 await connection.ConnectAsync(_serverIP, _serverPort);
                 User authenticatedUser = await connection.AuthenticateAsync(password, name);
 
-                var chatForm = new ChatForm(historyPath);
+                // ПЕРЕДАЕМ имя пользователя в ChatForm
+                var chatForm = new ChatForm(connection, authenticatedUser.Name);
                 chatForm.FormClosed += (s, args) => Application.Exit();
                 chatForm.Show();
                 this.Hide();
