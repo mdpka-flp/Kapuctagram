@@ -1,5 +1,4 @@
-﻿// Kapuctagram/Network/ClientConnection.cs
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -26,7 +25,6 @@ namespace Kapuctagram.Network
             Directory.CreateDirectory(Path.GetDirectoryName(_historyPath));
         }
 
-        // Подключение без аутентификации — остаётся
         public async Task ConnectAsync(string ip, int port)
         {
             _client = new TcpClient();
@@ -34,13 +32,11 @@ namespace Kapuctagram.Network
             _stream = _client.GetStream();
         }
 
-        // 🔑 НОВОЕ: аутентификация
         public async Task<User> AuthenticateAsync(string password, string name)
         {
             string authData = $"{password} | {name}";
             await SendRawAsync('A', authData);
 
-            // Ждём ответ от сервера
             var responseMsg = await MessageParser.ReadMessageAsync(_stream);
             if (responseMsg.Type != 'A')
                 throw new InvalidOperationException("Сервер не вернул данные аутентификации");
@@ -52,13 +48,11 @@ namespace Kapuctagram.Network
             string userId = parts[0];
             string finalName = parts[1];
 
-            // Запускаем прослушку сообщений
             _ = ListenAsync();
 
             return new User { ID = userId, Name = finalName, Password = password };
         }
 
-        // Прослушка — остаётся
         private async Task ListenAsync()
         {
             try
@@ -77,13 +71,11 @@ namespace Kapuctagram.Network
             }
         }
 
-        // Отправка текста — остаётся
         public async Task SendTextAsync(string text)
         {
             await SendRawAsync('T', text);
         }
 
-        // Отправка файла — остаётся
         public async Task SendFileAsync(string filePath)
         {
             string fileName = Path.GetFileName(filePath);
@@ -106,7 +98,6 @@ namespace Kapuctagram.Network
             File.AppendAllText(_historyPath, $"[FILE SENT] {DateTime.Now:HH:mm} {fileName}\n");
         }
 
-        // Вспомогательный метод — остаётся
         private async Task SendRawAsync(char type, string data)
         {
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
@@ -115,7 +106,6 @@ namespace Kapuctagram.Network
             await _stream.WriteAsync(dataBytes, 0, dataBytes.Length);
         }
 
-        // Dispose — остаётся
         public void Dispose()
         {
             _disposed = true;

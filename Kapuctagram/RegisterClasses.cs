@@ -32,7 +32,6 @@ namespace Kapuctagram
 
         public static string TestPassword(string input)
         {
-            //return input.Count(c => !char.IsLetterOrDigit(c));
             string password = input;
 
             if (password.Contains(' '))

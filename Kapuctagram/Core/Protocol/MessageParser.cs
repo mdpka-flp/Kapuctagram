@@ -1,5 +1,4 @@
-﻿// Kapuctagram/Protocol/MessageParser.cs
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -23,21 +22,21 @@ namespace Kapuctagram.Protocol
             if (length < 0 || length > 10_000_000)
                 throw new InvalidDataException("Некорректная длина сообщения");
 
-            if (type == 'T')
+            if (type == 'T') // Текстовое сообщение
             {
                 byte[] data = new byte[length];
                 await ReadExactly(stream, data);
                 string text = Encoding.UTF8.GetString(data);
                 return ChatMessage.CreateText(text);
             }
-            else if (type == 'F')
+            else if (type == 'F') // Файл
             {
                 byte[] data = new byte[length];
                 await ReadExactly(stream, data);
                 string fileName = Encoding.UTF8.GetString(data);
                 return ChatMessage.CreateFile(fileName);
             }
-            else if (type == 'A') // Добавьте эту обработку
+            else if (type == 'A') // Аутентификация
             {
                 byte[] data = new byte[length];
                 await ReadExactly(stream, data);
@@ -46,7 +45,7 @@ namespace Kapuctagram.Protocol
             }
             else
             {
-                // Пропускаем P/G
+                // Пропускаем типы сообщений P/G
                 byte[] skip = new byte[length];
                 await ReadExactly(stream, skip);
                 return new ChatMessage { Type = type, Text = "[Unsupported]" };

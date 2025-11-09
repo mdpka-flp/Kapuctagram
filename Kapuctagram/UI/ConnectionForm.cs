@@ -1,5 +1,4 @@
-﻿// Kapuctagram/UI/ConnectionForm.cs
-using System;
+﻿using System;
 using System.Net.Sockets;
 using System.Windows.Forms;
 using Kapuctagram.Network;

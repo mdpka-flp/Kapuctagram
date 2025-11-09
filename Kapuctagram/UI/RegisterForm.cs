@@ -12,9 +12,9 @@ using System.Windows.Forms;
 using Kapuctagram.Core.Models;
 using Kapuctagram.Core.Services;
 using KAPUCTAgram;
-using Kapuctagram.Core;        // ← для ChatMessage (если используется)
-using Kapuctagram.Services;    // ← для ChatService
-using Kapuctagram.UI;          // ← КЛЮЧЕВОЕ: чтобы найти ChatForm
+using Kapuctagram.Core;
+using Kapuctagram.Services;
+using Kapuctagram.UI;
 using Kapuctagram.Network;
 
 namespace Kapuctagram
@@ -47,11 +47,9 @@ namespace Kapuctagram
                     string[] parts = lines[0].Split('|');
                     if (parts.Length == 2)
                     {
-                        // Показываем кнопку быстрого входа
                         AutoLoginB.Text = $"Войти как {parts[1]}";
                         AutoLoginB.Visible = true;
 
-                        // Подписываем кнопку ТОЛЬКО на LoginWithSavedAccount
                         AutoLoginB.Click += (s, e) => LoginWithSavedAccount(parts[0], parts[1]);
                     }
                 }
@@ -78,7 +76,6 @@ namespace Kapuctagram
                 await connection.ConnectAsync(_serverIP, _serverPort);
                 User authenticatedUser = await connection.AuthenticateAsync(password, name);
 
-                // ПЕРЕДАЕМ имя пользователя в ChatForm
                 var chatForm = new ChatForm(connection, authenticatedUser.Name);
                 chatForm.FormClosed += (s, args) => Application.Exit();
                 chatForm.Show();
@@ -102,7 +99,6 @@ namespace Kapuctagram
                 await connection.ConnectAsync(_serverIP, _serverPort);
                 User authenticatedUser = await connection.AuthenticateAsync(password, name);
 
-                // ПЕРЕДАЕМ имя пользователя в ChatForm
                 var chatForm = new ChatForm(connection, authenticatedUser.Name);
                 chatForm.FormClosed += (s, args) => Application.Exit();
                 chatForm.Show();
@@ -134,8 +130,6 @@ namespace Kapuctagram
                 RegisterB.Enabled = true;
             }
             ShowError(resultOfTest);
-            
-
         }
         private void ShowError(string message)
         {

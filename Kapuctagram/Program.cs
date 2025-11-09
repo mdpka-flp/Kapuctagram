@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Kapuctagram;
-using Kapuctagram.UI; // ← важно: пространство имён, где лежат ConnectionForm и RegisterForm
+using Kapuctagram.UI;
 
 namespace KAPUCTAgram
 {
@@ -13,7 +13,7 @@ namespace KAPUCTAgram
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Шаг 1: Показываем форму подключения к серверу
+            // Показываем форму подключения к серверу
             var connectionForm = new ConnectionForm();
             var result = connectionForm.ShowDialog();
 
@@ -26,7 +26,6 @@ namespace KAPUCTAgram
             }
             else
             {
-                // Пользователь закрыл окно подключения — завершаем приложение
                 Application.Exit();
             }
         }

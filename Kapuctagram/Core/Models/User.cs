@@ -9,7 +9,7 @@ namespace Kapuctagram.Core.Models
     public class User
     {
         public string ID { get; set; }       // Уникальный ID пользователя
-        public string Name { get; set; }     // Никнейм
+        public string Name { get; set; }     // Никнейм (может быть изменён)
         public string Password { get; set; } // Пароль
     }
 }

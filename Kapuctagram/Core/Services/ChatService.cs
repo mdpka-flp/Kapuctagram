@@ -1,8 +1,7 @@
-﻿// Kapuctagram/Services/ChatService.cs
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using Kapuctagram.Core;        // ← добавлено
-using Kapuctagram.Network;     // ← добавлено
+using Kapuctagram.Core;
+using Kapuctagram.Network;
 
 namespace Kapuctagram.Services
 {
@@ -10,14 +9,11 @@ namespace Kapuctagram.Services
     {
         private ClientConnection _connection;
 
-        // Было: Action<Message> → стало: Action<ChatMessage>
         public event Action<ChatMessage> OnMessageReceived;
 
         public async Task ConnectAsync(string ip, int port, string historyPath)
         {
             _connection = new ClientConnection(historyPath);
-            // Было: msg => OnMessageReceived?.Invoke(msg)
-            // Теперь типы совпадают
             _connection.OnMessageReceived += msg => OnMessageReceived?.Invoke(msg);
             await _connection.ConnectAsync(ip, port);
         }

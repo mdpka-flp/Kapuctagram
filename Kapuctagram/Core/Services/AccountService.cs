@@ -20,13 +20,13 @@ namespace Kapuctagram.Core.Services
             string accountFile = Path.Combine(_appDataPath, "current_account.txt");
 
             if (!File.Exists(accountFile))
-                return new User(); // пустой аккаунт
+                return new User();
 
             try
             {
                 string line = File.ReadAllLines(accountFile)[0];
                 string[] parts = line.Split('|');
-                if (parts.Length >= 3) // Теперь ожидаем 3 части
+                if (parts.Length >= 3)
                 {
                     return new User
                     {
@@ -35,7 +35,7 @@ namespace Kapuctagram.Core.Services
                         Name = parts[2]
                     };
                 }
-                else if (parts.Length >= 2) // Для обратной совместимости
+                else if (parts.Length >= 2)
                 {
                     return new User
                     {
@@ -47,10 +47,10 @@ namespace Kapuctagram.Core.Services
             }
             catch (Exception)
             {
-                // Игнорируем ошибки
+
             }
 
-            return new User(); // пустой аккаунт в случае ошибки
+            return new User();
         }
 
         public void SaveAccount(User user)
@@ -58,7 +58,6 @@ namespace Kapuctagram.Core.Services
             Directory.CreateDirectory(_appDataPath);
             string accountFile = Path.Combine(_appDataPath, "current_account.txt");
 
-            // Сохраняем в новом формате: пароль|ID|имя
             string record = $"{user.Password}|{user.ID}|{user.Name}";
             File.WriteAllText(accountFile, record);
         }
